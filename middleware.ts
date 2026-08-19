@@ -1,5 +1,5 @@
 // CANONICAL: Supabase session refresh + route protection for HomeschoolCompliance Pack.
-// PATCHED: /api/cron allowlisted (scheduler authenticates with CRON_SECRET, no session exists),
+// Reminder delivery is platform-dispatcher-owned (X7) — no product cron route exists,
 // /api/states and /api/plans allowlisted (public catalog reads backed by public RLS),
 // explicit same-origin CORS posture with preflight handling, dashboard pages added to redirects.
 import { createServerClient } from '@supabase/ssr'
@@ -16,10 +16,10 @@ const PROTECTED_PAGE_PREFIXES = [
   '/billing',
 ]
 // /api/zo is the beacon collector (Law #197), /api/auth handles its own sessions,
-// /api/webhooks is reserved by spec, /api/cron enforces its own CRON_SECRET bearer
+// /api/webhooks is reserved by spec
 // (the platform scheduler has no browser session), and /api/states + /api/plans are
 // public catalog reads backed by anon-readable RLS policies.
-const PUBLIC_API_PREFIXES = ['/api/zo', '/api/webhooks', '/api/auth', '/api/cron', '/api/states', '/api/plans']
+const PUBLIC_API_PREFIXES = ['/api/zo', '/api/webhooks', '/api/auth', '/api/states', '/api/plans']
 const AUTH_ONLY_PAGES = ['/login', '/signup']
 
 export async function middleware(request: NextRequest) {
@@ -49,7 +49,7 @@ export async function middleware(request: NextRequest) {
   if (!supabaseUrl || !supabaseAnonKey) return response
 
   // Public API prefixes skip session work entirely: their handlers enforce their
-  // own auth (CRON_SECRET bearer for /api/cron) or are intentionally public reads.
+  // own auth or are intentionally public reads.
   if (
     pathname.startsWith('/api/') &&
     PUBLIC_API_PREFIXES.some((prefix) => pathname === prefix || pathname.startsWith(prefix + '/'))
