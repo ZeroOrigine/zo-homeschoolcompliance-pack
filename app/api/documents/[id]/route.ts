@@ -1,6 +1,6 @@
 // CANONICAL: single document routes (edit fields, regenerate body, finalize, delete).
 import { z } from 'zod';
-import { enforceRateLimit, fail, ok, parseWith, readJsonBody, requireUser, unexpected } from '@/lib/api/http';
+import { rateLimitGuard, fail, ok, parseWith, readJsonBody, requireUser, unexpected } from '@/lib/api/http';
 import { DOCUMENT_STATUSES, isUuid } from '@/lib/db/constants';
 import { getStateByCode } from '@/lib/db/catalog';
 import {
@@ -42,7 +42,7 @@ export async function GET(_request: Request, { params }: { params: { id: string 
 export async function PATCH(request: Request, { params }: { params: { id: string } }) {
   try {
     if (!isUuid(params.id)) return fail(400, 'invalid_id', 'That document id is not valid.');
-    const limited = await enforceRateLimit(request, 'write');
+    const limited = await rateLimitGuard(request, 'write');
     if (limited) return limited;
     const auth = await requireUser();
     if (auth.response) return auth.response;
@@ -87,7 +87,7 @@ export async function PATCH(request: Request, { params }: { params: { id: string
 export async function DELETE(request: Request, { params }: { params: { id: string } }) {
   try {
     if (!isUuid(params.id)) return fail(400, 'invalid_id', 'That document id is not valid.');
-    const limited = await enforceRateLimit(request, 'write');
+    const limited = await rateLimitGuard(request, 'write');
     if (limited) return limited;
     const auth = await requireUser();
     if (auth.response) return auth.response;
