@@ -1,6 +1,6 @@
 // CANONICAL: local page view beacon collector (Law 197). ZoBeacon posts here; the middleware owned by the auth step allowlists this path.
 import { z } from 'zod';
-import { enforceRateLimit, ok, parseWith, readJsonBody, unexpected } from '@/lib/api/http';
+import { rateLimitGuard, ok, parseWith, readJsonBody, unexpected } from '@/lib/api/http';
 import { emitProductMetric } from '@/lib/db/metrics';
 
 export const dynamic = 'force-dynamic';
@@ -17,7 +17,7 @@ function sanitizePath(raw: string): string {
 
 export async function POST(request: Request) {
   try {
-    const limited = await enforceRateLimit(request, 'beacon');
+    const limited = await rateLimitGuard(request, 'beacon');
     if (limited) return limited;
     const parsed = parseWith(beaconSchema, await readJsonBody(request));
     if (!parsed.ok) return parsed.response;
