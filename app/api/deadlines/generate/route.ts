@@ -1,6 +1,6 @@
 // CANONICAL: builds the personal compliance calendar from the state requirement catalog. Activation (Law 116) fires here on a user's first generated calendar.
 import { z } from 'zod';
-import { enforceRateLimit, fail, ok, parseWith, readJsonBody, requireUser, schoolYearSchema, stateCodeSchema, unexpected } from '@/lib/api/http';
+import { rateLimitGuard, fail, ok, parseWith, readJsonBody, requireUser, schoolYearSchema, stateCodeSchema, unexpected } from '@/lib/api/http';
 import { getStateByCode } from '@/lib/db/catalog';
 import { countDeadlines, generateCalendar } from '@/lib/db/deadlines';
 import { hasCompleteAccess } from '@/lib/db/entitlement';
@@ -16,7 +16,7 @@ const generateSchema = z.object({
 
 export async function POST(request: Request) {
   try {
-    const limited = await enforceRateLimit(request, 'write');
+    const limited = await rateLimitGuard(request, 'write');
     if (limited) return limited;
     const auth = await requireUser();
     if (auth.response) return auth.response;
