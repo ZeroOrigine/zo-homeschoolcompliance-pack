@@ -1,0 +1,52 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-display: 'Plus Jakarta Sans';
+  --font-body: 'Inter';
+  --font-mono: 'JetBrains Mono';
+}
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    scroll-behavior: smooth;
+  }
+  body {
+    font-family: var(--font-body), system-ui, sans-serif;
+    font-feature-settings: 'kern' 1, 'liga' 1;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display), var(--font-body), system-ui, sans-serif;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+  img, svg, video { max-width: 100%; height: auto; }
+}
+
+@layer utilities {
+  .font-display { font-family: var(--font-display), var(--font-body), system-ui, sans-serif; }
+  .font-body { font-family: var(--font-body), system-ui, sans-serif; }
+  .font-data { font-family: var(--font-mono), ui-monospace, SFMono-Regular, monospace; }
+}
+
+@media print {
+  body * { visibility: hidden; }
+  .print-area, .print-area * { visibility: visible; }
+  .print-area { position: absolute; left: 0; top: 0; width: 100%; padding: 2rem; }
+}
+
+/* Touch ergonomics (self-validation patch): interactive controls reach the 44px
+   minimum tap height on coarse pointers without changing desktop density. */
+@media (pointer: coarse) {
+  button,
+  select,
+  textarea,
+  a.inline-flex,
+  input:not([type='checkbox']):not([type='radio']) {
+    min-height: 44px;
+  }
+}
