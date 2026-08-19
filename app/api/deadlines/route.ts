@@ -1,6 +1,6 @@
 // CANONICAL: deadline collection routes (list plus custom deadline creation).
 import { z } from 'zod';
-import { enforceRateLimit, fail, getPagination, ok, parseWith, readJsonBody, requireUser, schoolYearSchema, unexpected } from '@/lib/api/http';
+import { rateLimitGuard, fail, getPagination, ok, parseWith, readJsonBody, requireUser, schoolYearSchema, unexpected } from '@/lib/api/http';
 import { DEADLINE_STATUSES, isIsoDate, isUuid, parseSchoolYear, type DeadlineStatus } from '@/lib/db/constants';
 import { createDeadline, listDeadlines } from '@/lib/db/deadlines';
 import { hasCompleteAccess } from '@/lib/db/entitlement';
@@ -58,7 +58,7 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    const limited = await enforceRateLimit(request, 'write');
+    const limited = await rateLimitGuard(request, 'write');
     if (limited) return limited;
     const auth = await requireUser();
     if (auth.response) return auth.response;
