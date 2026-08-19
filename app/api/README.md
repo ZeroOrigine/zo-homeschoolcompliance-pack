@@ -9,6 +9,6 @@ Purpose beacon (Law 116):
 - page_view is collected by POST /api/zo (browser writable, page views only, query strings stripped).
 - signup belongs in the auth callback and payment in the Stripe webhook. Both import emitProductMetric from lib/db/metrics.ts.
 
-Scheduler: /api/cron/reminders runs daily at 12:00 UTC, fired by the platform scheduler with Authorization: Bearer CRON_SECRET. Email transport is not provisioned in the ecosystem env set, so reminders surface in-product (GET /api/deadlines?reminder_due=true). Marking reminder_sent_at keeps the queue idempotent for when a mailer is provisioned.
+Reminders: delivery is a PLATFORM organ (X7). The ecosystem dispatcher polls the deadlines table directly (remind_at due, reminder_sent_at null), sends via the platform mailer, and stamps reminder_sent_at. The product ships no cron route and no mail transport; in-product reminders surface via GET /api/deadlines?reminder_due=true.
 
 Paid gate: POST /api/deadlines, POST /api/deadlines/generate, and POST /api/documents return 402 with code payment_required until the one time Compliance Pack purchase clears (homeschoolcompliancepack_payments.status = succeeded, written by the service role webhook).
