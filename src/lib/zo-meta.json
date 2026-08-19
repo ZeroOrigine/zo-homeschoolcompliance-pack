@@ -1,4 +1,24 @@
 {
-  "present": false,
-  "_note": "Sentinel. The deploy layer overwrites this file per product with real birth data (name, tagline, born, scores, cost, funders, story_url). While present is false or name is absent, /about returns 404. This file MUST exist so the static import never breaks the build (zeroorigine.com ships the sentinel and gets no About page)."
+  "name": "HomeschoolCompliance Pack",
+  "tagline": "Your state's homeschool deadlines and forms, done in 10 minutes.",
+  "description": "Parent selects their state; gets a pre-filled notice-of-intent template, a personal calendar of every required filing/testing date for the year, and email reminders 2 weeks out.",
+  "born": "2026-08-18T18:08:57.625551+00:00",
+  "research_score": 7.1,
+  "ethics_verdict": "APPROVED",
+  "ethics_score": 6.8,
+  "ethics_concerns": [
+    "Core value is authoritative, state-specific statutory data (filing/testing deadlines, notice-of-intent templates) that amend independently \u2014 Lens 6 fully triggered",
+    "A stale rule or outdated template directly risks a family's legal standing and a child's schooling"
+  ],
+  "qa_score": 182,
+  "qa_max": 185,
+  "true_cost": 110.83,
+  "calls": 159,
+  "funders": [
+    "the founder"
+  ],
+  "story_url": "https://zeroorigine.com/story/homeschoolcompliance-pack",
+  "template_sha": null,
+  "publisher": "ZeroOrigine",
+  "publisher_url": "https://zeroorigine.com"
 }
