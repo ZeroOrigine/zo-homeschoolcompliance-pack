@@ -1,6 +1,6 @@
 // CANONICAL: current user profile read and update.
 import { z } from 'zod';
-import { enforceRateLimit, fail, ok, parseWith, readJsonBody, requireUser, stateCodeSchema, unexpected } from '@/lib/api/http';
+import { rateLimitGuard, fail, ok, parseWith, readJsonBody, requireUser, stateCodeSchema, unexpected } from '@/lib/api/http';
 import { getStateByCode } from '@/lib/db/catalog';
 import { getOrCreateProfile, updateProfile } from '@/lib/db/profiles';
 
@@ -34,7 +34,7 @@ export async function GET() {
 
 export async function PATCH(request: Request) {
   try {
-    const limited = await enforceRateLimit(request, 'write');
+    const limited = await rateLimitGuard(request, 'write');
     if (limited) return limited;
     const auth = await requireUser();
     if (auth.response) return auth.response;
