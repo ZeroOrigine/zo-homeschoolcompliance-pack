@@ -67,7 +67,7 @@ const RATE_LIMITS = {
 
 export type RateLimitKind = keyof typeof RATE_LIMITS;
 
-export async function enforceRateLimit(request: Request, kind: RateLimitKind = 'write'): Promise<NextResponse | null> {
+export async function rateLimitGuard(request: Request, kind: RateLimitKind = 'write'): Promise<NextResponse | null> {
   const limit = RATE_LIMITS[kind];
   const verdict = await rateLimitCheck(limit.bucket, clientIp(request), limit.perKeyDailyCap, limit.globalDailyCap);
   if (!verdict.allowed) {
