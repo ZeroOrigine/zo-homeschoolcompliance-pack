@@ -55,6 +55,27 @@ function LoginForm() {
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
 
+
+  async function handleGoogle() {
+    setError(null)
+    let supabase
+    try {
+      supabase = createSupabaseBrowserClient()
+    } catch (clientError) {
+      setError(
+        clientError instanceof Error
+          ? clientError.message
+          : 'We could not reach the sign-in service. Please try again in a few minutes.'
+      )
+      return
+    }
+    const { error: oauthError } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: `${window.location.origin}/auth/confirm?next=${encodeURIComponent(nextPath)}` },
+    })
+    if (oauthError) setError('Google sign-in did not start. Please try again or use your password.')
+  }
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     if (loading) return
@@ -167,6 +188,27 @@ function LoginForm() {
           )}
         </button>
       </form>
+
+      <div className="mt-6 flex items-center gap-3" aria-hidden="true">
+        <div className="h-px flex-1 bg-slate-200" />
+        <span className="text-xs font-medium uppercase tracking-wide text-slate-400">or</span>
+        <div className="h-px flex-1 bg-slate-200" />
+      </div>
+
+      <button
+        type="button"
+        onClick={handleGoogle}
+        disabled={loading}
+        className="mt-6 inline-flex w-full items-center justify-center gap-3 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition-colors hover:bg-slate-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
+      >
+        <svg className="h-4 w-4" viewBox="0 0 24 24" aria-hidden="true">
+          <path fill="#4285F4" d="M23.5 12.3c0-.9-.1-1.5-.3-2.2H12v4.1h6.5c-.1 1.1-.8 2.7-2.4 3.8l-.02.15 3.5 2.7.24.03c2.2-2.05 3.5-5.05 3.5-8.6" />
+          <path fill="#34A853" d="M12 24c3.2 0 5.9-1.05 7.9-2.9l-3.75-2.9c-1 .7-2.35 1.2-4.15 1.2-3.15 0-5.85-2.1-6.8-5l-.14.01-3.63 2.8-.05.13C3.35 21.3 7.35 24 12 24" />
+          <path fill="#FBBC05" d="M5.2 14.4c-.25-.75-.4-1.55-.4-2.4s.15-1.65.4-2.4l-.01-.16-3.68-2.86-.12.06C.5 8.35 0 10.1 0 12s.5 3.65 1.4 5.35l3.8-2.95" />
+          <path fill="#EB4335" d="M12 4.6c2.25 0 3.75.95 4.6 1.75l3.35-3.3C17.9 1.15 15.2 0 12 0 7.35 0 3.35 2.7 1.4 6.65l3.8 2.95c.95-2.9 3.65-5 6.8-5" />
+        </svg>
+        Continue with Google
+      </button>
 
       <p className="mt-6 text-center text-sm text-slate-600">
         {'New here? '}

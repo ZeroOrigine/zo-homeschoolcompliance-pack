@@ -75,6 +75,13 @@ export async function GET(request: NextRequest) {
     if (!error) return redirectTo(next)
   }
 
+  // No token_hash and no code reached the SERVER — but implicit-flow links
+  // carry the session in the URL FRAGMENT, which browsers re-attach across
+  // this redirect. Forward recovery traffic to the reset page (its client
+  // code consumes the fragment); only non-recovery traffic is truly dead here.
+  if (type === 'recovery' || next === '/reset-password') {
+    return redirectTo('/reset-password')
+  }
   return redirectTo(
     '/login?message=' +
       encodeURIComponent('That link has expired or was already used. Sign in, or request a fresh link.')

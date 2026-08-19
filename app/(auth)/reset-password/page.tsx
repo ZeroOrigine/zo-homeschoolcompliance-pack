@@ -37,6 +37,23 @@ export default function ResetPasswordPage() {
       setStatus('expired')
       return
     }
+    // Recovery links can deliver the session in the URL FRAGMENT
+    // (#access_token=...&refresh_token=...) — a server route never sees
+    // fragments, so THIS page consumes it explicitly. Found live 2026-08-19:
+    // every recovery click died as "expired" because nothing read the hash.
+    const hash = typeof window !== 'undefined' ? window.location.hash : ''
+    const params = new URLSearchParams(hash.startsWith('#') ? hash.slice(1) : hash)
+    const accessToken = params.get('access_token')
+    const refreshToken = params.get('refresh_token')
+    if (accessToken && refreshToken) {
+      supabase.auth
+        .setSession({ access_token: accessToken, refresh_token: refreshToken })
+        .then(({ error: sessionError }) => {
+          window.history.replaceState(null, '', window.location.pathname)
+          setStatus(sessionError ? 'expired' : 'ready')
+        })
+      return
+    }
     supabase.auth.getSession().then(({ data }) => {
       setStatus(data.session ? 'ready' : 'expired')
     })
