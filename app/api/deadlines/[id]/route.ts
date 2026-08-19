@@ -1,6 +1,6 @@
 // CANONICAL: single deadline routes (edit, complete, dismiss, delete).
 import { z } from 'zod';
-import { enforceRateLimit, fail, ok, parseWith, readJsonBody, requireUser, schoolYearSchema, unexpected } from '@/lib/api/http';
+import { rateLimitGuard, fail, ok, parseWith, readJsonBody, requireUser, schoolYearSchema, unexpected } from '@/lib/api/http';
 import { DEADLINE_STATUSES, isIsoDate, isUuid } from '@/lib/db/constants';
 import { deleteDeadline, getDeadline, updateDeadline } from '@/lib/db/deadlines';
 import { getStudent } from '@/lib/db/students';
@@ -34,7 +34,7 @@ export async function GET(_request: Request, { params }: { params: { id: string 
 export async function PATCH(request: Request, { params }: { params: { id: string } }) {
   try {
     if (!isUuid(params.id)) return fail(400, 'invalid_id', 'That deadline id is not valid.');
-    const limited = await enforceRateLimit(request, 'write');
+    const limited = await rateLimitGuard(request, 'write');
     if (limited) return limited;
     const auth = await requireUser();
     if (auth.response) return auth.response;
@@ -57,7 +57,7 @@ export async function PATCH(request: Request, { params }: { params: { id: string
 export async function DELETE(request: Request, { params }: { params: { id: string } }) {
   try {
     if (!isUuid(params.id)) return fail(400, 'invalid_id', 'That deadline id is not valid.');
-    const limited = await enforceRateLimit(request, 'write');
+    const limited = await rateLimitGuard(request, 'write');
     if (limited) return limited;
     const auth = await requireUser();
     if (auth.response) return auth.response;
