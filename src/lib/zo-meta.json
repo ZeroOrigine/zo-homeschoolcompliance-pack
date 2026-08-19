@@ -12,13 +12,13 @@
   ],
   "qa_score": 182,
   "qa_max": 185,
-  "true_cost": 110.83,
-  "calls": 159,
+  "true_cost": 111.16,
+  "calls": 162,
   "funders": [
     "the founder"
   ],
   "story_url": "https://zeroorigine.com/story/homeschoolcompliance-pack",
-  "template_sha": null,
+  "template_sha": "8950a528690e",
   "publisher": "ZeroOrigine",
   "publisher_url": "https://zeroorigine.com"
 }
