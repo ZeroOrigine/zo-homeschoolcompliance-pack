@@ -253,48 +253,9 @@ export async function generateCalendar(supabase: SupabaseClient, userId: string,
   return { created: sorted, preservedCompleted: settledKeys.size };
 }
 
-export type ReminderBatchItem = { id: string; user_id: string; title: string; due_date: string; email: string | null };
-
-// Fetches due reminders WITHOUT stamping reminder_sent_at. Marking is deferred
-// to markRemindersSent so a reminder is only consumed after its email actually
-// went out — nothing is lost while no mailer is provisioned. Recipient
-// emails are hydrated from the profiles table so the enabled path can send.
-export async function listDueReminders(service: SupabaseClient, limit = 500): Promise<ReminderBatchItem[]> {
-  const { data, error } = await service
-    .from(TABLE)
-    .select('id, user_id, title, due_date')
-    .eq('status', 'upcoming')
-    .is('reminder_sent_at', null)
-    .lte('remind_at', todayIso())
-    .order('due_date', { ascending: true })
-    .limit(limit);
-  if (error) throw new Error(error.message);
-  const rows = (data ?? []) as Array<Omit<ReminderBatchItem, 'email'>>;
-  if (rows.length === 0) return [];
-  const userIds = Array.from(new Set(rows.map((row) => row.user_id)));
-  const { data: profiles, error: profilesError } = await service
-    .from(PROFILES_TABLE)
-    .select('user_id, email')
-    .in('user_id', userIds);
-  if (profilesError) throw new Error(profilesError.message);
-  const emailByUser = new Map<string, string | null>();
-  for (const profile of (profiles ?? []) as Array<{ user_id: string; email: string | null }>) {
-    emailByUser.set(profile.user_id, profile.email ?? null);
-  }
-  return rows.map((row) => ({ ...row, email: emailByUser.get(row.user_id) ?? null }));
-}
-
-// Persist reminder_sent_at ONLY for ids whose reminder emails were successfully
-// sent. Unmarked rows are returned again on the next run, so previously listed
-// reminders are never permanently consumed without an email going out.
-export async function markRemindersSent(service: SupabaseClient, ids: string[]): Promise<number> {
-  if (ids.length === 0) return 0;
-  const { data, error } = await service
-    .from(TABLE)
-    .update({ reminder_sent_at: new Date().toISOString() })
-    .in('id', ids)
-    .is('reminder_sent_at', null)
-    .select('id');
-  if (error) throw new Error(error.message);
-  return (data ?? []).length;
-}
+// Reminder DELIVERY is a platform organ (X7): the ecosystem dispatcher polls
+// homeschoolcompliancepack_deadlines directly (status='upcoming', remind_at due,
+// reminder_sent_at null), resolves recipients from the profiles table, sends via
+// the platform mailer, and stamps reminder_sent_at in this product's dialect.
+// The product ships NO mail transport and NO cron route — the remind_at /
+// reminder_sent_at columns and their partial index above ARE the contract.
